@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/noaway/v2-agent/cmd"
-	"github.com/noaway/v2-agent/internal/version"
+	"github.com/noaway/v2agent/cmd"
+	"github.com/noaway/v2agent/internal/version"
 	"github.com/spf13/cobra"
 )
 

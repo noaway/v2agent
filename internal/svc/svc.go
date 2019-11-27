@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/sirupsen/logrus"
-	"github.com/noaway/v2-agent/internal/utils"
+	"github.com/noaway/v2agent/internal/utils"
 )
 
 var signalNotify = signal.Notify

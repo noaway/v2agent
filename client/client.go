@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/noaway/v2-agent/config"
+	"github.com/noaway/v2agent/config"
 	"github.com/twinj/uuid"
 	"google.golang.org/grpc"
 	"v2ray.com/core"

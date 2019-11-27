@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/memberlist"
 	"github.com/hashicorp/serf/serf"
-	"github.com/noaway/v2-agent/internal/utils"
+	"github.com/noaway/v2agent/internal/utils"
 )
 
 const (

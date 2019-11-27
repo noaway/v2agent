@@ -8,12 +8,13 @@ import (
 )
 
 type Configuration struct {
-	Name             string           `hcl:"name"`
-	JoinClusterAddrs []string         `hcl:"join_cluster_addrs"`
-	Server           Server           `hcl:"server,block"`
-	V2rayAddr        string           `hcl:"v2ray_addr"`
-	DataDir          string           `hcl:"data_dir"`
-	V2HandlerService V2HandlerService `hcl:"v2ray_handler_service,block"`
+	Name             string          `hcl:"name"`
+	JoinClusterAddrs []string        `hcl:"join_cluster_addrs"`
+	Server           Server          `hcl:"server,block"`
+	V2rayAddr        string          `hcl:"v2ray_addr"`
+	DataDir          string          `hcl:"data_dir"`
+	V2HandlerConfig  V2HandlerConfig `hcl:"v2ray_handler_service,block"`
+	WebConfig        WebConfig       `hcl:"web_config,block"`
 }
 
 type Server struct {
@@ -22,7 +23,7 @@ type Server struct {
 	AdvertiseAddr string `hcl:"advertise_addr"`
 }
 
-type V2HandlerService struct {
+type V2HandlerConfig struct {
 	Addr string `hcl:"addr"`
 	Tag  string `hcl:"tag"`
 }

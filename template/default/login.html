@@ -1,0 +1,25 @@
+{{template "head" .}}
+<form>
+    <div>
+        <label>邮箱地址: </label>
+        <input type="email" placeholder="Email">
+    </div>
+    <div class="form-group">
+        <label>密码: </label>
+        <input type="password" placeholder="Password">
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox"> 记住我
+        </label>
+        <label class="pull-right">
+            <a href="#">忘记密码?</a>
+        </label>
+
+    </div>
+    <button type="submit" class="btn btn-success btn-flat m-b-30 m-t-30">Sign in</button>
+    <div>
+        <p>没有账号 ? <a href="#"> 注册</a></p>
+    </div>
+</form>
+{{template "footer" .}}

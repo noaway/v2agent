@@ -7,10 +7,9 @@ import (
 var configPath string
 
 func Commands(root *cobra.Command, childs ...*cobra.Command) {
-	root.Flags().StringVarP(&configPath, "config", "c", "", "config path")
-
 	root.AddCommand(
 		webCommand(),
 		agentCommand(),
 	)
+	root.Flags().StringVarP(&configPath, "config", "c", "", "config path")
 }
