@@ -1,13 +1,10 @@
 package config
 
-import(
+import (
 	"github.com/noaway/godao"
 )
 
-type WebConfig struct{
-	Addr string `hcl:"addr"`
-}
-
-func show(){
-	_=godao.Engine
+type WebConfig struct {
+	Addr string                 `hcl:"addr"`
+	DB   godao.PostgreSQLConfig `hcl:"db,block"`
 }

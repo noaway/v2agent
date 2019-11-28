@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"net"
 	"fmt"
+	"net"
 
 	"github.com/noaway/v2agent/agent"
 	// "github.com/noaway/v2agent/client"
@@ -50,8 +50,8 @@ func (p *proc) Init() error {
 
 func (p *proc) Start() error {
 	// client.DelUser("ggg")
-	if p.WebConfig.Addr == ""{
-		return fmt.Errorf("%v","[web] error listen addr is empty")
+	if p.WebConfig.Addr == "" {
+		return fmt.Errorf("%v", "[web] error listen addr is empty")
 	}
 	logrus.Info("listen: ", p.WebConfig.Addr)
 	httpListener, err := net.Listen("tcp", p.WebConfig.Addr)
