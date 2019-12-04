@@ -57,23 +57,20 @@ func (web *WEB) Handler() (http.Handler, error) {
 	// metrics
 	r.GET("metrics", func(c *gin.Context) { promhttp.Handler().ServeHTTP(c.Writer, c.Request) })
 
-	v1 := r.Group("v1", authRequired)
-	{
-		v1.GET("getips", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "index.html", "Hello World noaway")
-		})
-
-	}
-
+	r.GET("/user", authRequired, web.decorator(index))
 	auth := r.Group("auth")
 	{
-		auth.GET("/login", getLogin)
-		auth.POST("/login", postLogin)
-		auth.GET("/register", getRegister)
-		auth.POST("/register", postRegister)
+		auth.GET("/login", web.decorator(getLogin))
+		auth.POST("/login", web.decorator(postLogin))
+		auth.GET("/register", web.decorator(getRegister))
+		auth.POST("/register", web.decorator(postRegister))
 	}
 
 	return r, nil
+}
+
+func (web *WEB) decorator(handler HandlerFunc) gin.HandlerFunc {
+	return func(c *gin.Context) { handler(Ctx(c)) }
 }
 
 // Main func

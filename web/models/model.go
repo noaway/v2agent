@@ -27,19 +27,8 @@ func InitPostgre(config godao.PostgreSQLConfig) error {
 	).Error
 }
 
-type User struct {
-	ID    int    `gorm:"column:id"`
-	Email string `gorm:"column:email"`
-	Name  string `gorm:"column:name"`
-	Role  int    `gorm:"column:role"`
-
-	Base
-}
-
-func (User) TableName() string { return "user" }
-
 type Commodity struct {
-	ID          int       `gorm:"column:id"`
+	ID          int       `gorm:"column:id,not null;primary_key;auto_increment"`
 	ExpireTime  time.Time `gorm:"column:expire_time"`
 	Price       int       `gorm:"column:price"`
 	Title       string    `gorm:"column:title"`
@@ -51,7 +40,7 @@ type Commodity struct {
 func (Commodity) TableName() string { return "commodity" }
 
 type Order struct {
-	ID          int `gorm:"column:id"`
+	ID          int `gorm:"column:id,not null;primary_key;auto_increment"`
 	UserID      int `gorm:"column:user_id"`
 	CommodityID int `gorm:"column:commodity_id"`
 
@@ -61,7 +50,7 @@ type Order struct {
 func (Order) TableName() string { return "order" }
 
 type VPSNode struct {
-	ID            int    `gorm:"column:id"`
+	ID            int    `gorm:"column:id,not null;primary_key;auto_increment"`
 	Name          string `gorm:"column:name"`
 	User          string `gorm:"column:user"`
 	Host          string `gorm:"column:host"`

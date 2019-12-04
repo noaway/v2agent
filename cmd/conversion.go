@@ -1,0 +1,155 @@
+package cmd
+
+import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"strings"
+
+	"github.com/noaway/v2agent/config"
+	"github.com/noaway/v2agent/internal/utils"
+	"github.com/spf13/cobra"
+)
+
+var KitMap = map[string]Kit{
+	"quantumult": NewQuantumult(),
+	"kitsunebi":  NewKitsunebi(),
+}
+
+func conversionCommand() *cobra.Command {
+	var kitKey string
+	cmd := &cobra.Command{
+		Use:   "conversion",
+		Short: "Run v2-agnet conversion config",
+		Long:  `Run v2-agnet conversion config`,
+		Run: func(_ *cobra.Command, _ []string) {
+			config.NewConfigure(configPath)
+
+			kit, ok := KitMap[kitKey]
+			if !ok {
+				fmt.Println("not found kit")
+				return
+			}
+			fmt.Println(kit.Content(config.Configure().V2CliConfig))
+		},
+	}
+	cmd.Flags().StringVarP(&configPath, "config", "c", "", "config path")
+	cmd.Flags().StringVarP(&kitKey, "kit", "", "", "kit")
+	return cmd
+}
+
+func encodeBase64(src string) string {
+	return base64.RawStdEncoding.EncodeToString([]byte(src))
+}
+
+func format(f string, a ...interface{}) string {
+	return fmt.Sprintf(f, a...)
+}
+
+type Kit interface {
+	Content(config.V2CliConfig) string
+	Subscribe() string
+	URLSchema() string
+}
+
+func NewQuantumult() *Quantumult {
+	return &Quantumult{}
+}
+
+type Quantumult struct {
+	content   string
+	subscribe string
+	urlSchema string
+}
+
+func (q *Quantumult) Content(conf config.V2CliConfig) string {
+	certificate := "0"
+	if conf.SkipCertVerify {
+		certificate = "1"
+	}
+	strs := []string{
+		format("%v = vmess", conf.Name),
+		conf.Server,
+		utils.ToStr(conf.Port),
+		conf.Cipher,
+		format(`"%v"`, conf.UUID),
+		format("group=%v", conf.GroupName),
+		format("over-tls=%v", conf.TLS),
+		format("tls-host=%v", conf.TLSHost),
+		format("certificate=%v", certificate),
+		format("obfs=%v", conf.Protocol),
+		format("obfs-path=%v", conf.WSPath),
+		`obfs-header="Host: 01.alternate.19900101.xyz[Rr][Nn]User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 18_0_0 like Mac OS X) AppleWebKit/888.8.88 (KHTML, like Gecko) Mobile/6666666"`,
+	}
+	str := strings.Join(strs, ",")
+	fmt.Println(str)
+	q.content = encodeBase64("vmess://" + encodeBase64(str))
+	return q.content
+}
+func (q *Quantumult) Subscribe() string { return q.subscribe }
+func (q *Quantumult) URLSchema() string { return q.urlSchema }
+
+func NewKitsunebi() *Kitsunebi {
+	return &Kitsunebi{}
+}
+
+type Kitsunebi struct {
+	Host  string `json:"host"`
+	Path  string `json:"path"`
+	Tls   string `json:"tls"`
+	Add   string `json:"add"`
+	Port  int    `json:"port"`
+	Aid   int    `json:"aid"`
+	Net   string `json:"net"`
+	Type  string `json:"type"`
+	V     string `json:"v"`
+	PS    string `json:"ps"`
+	ID    string `json:"id"`
+	Class int    `json:"class"`
+}
+
+func (kit *Kitsunebi) Content(conf config.V2CliConfig) string {
+	{
+		kit.Host = conf.Server
+		kit.Path = conf.WSPath
+		if conf.TLS {
+			kit.Tls = "tls"
+		}
+		kit.Add = conf.Server
+		kit.Port = conf.Port
+		kit.Aid = conf.AlterId
+		kit.Net = conf.Protocol
+		kit.Type = conf.Cipher
+		kit.V = "2"
+		kit.PS = conf.Name
+		kit.ID = conf.UUID
+		kit.Class = 0
+	}
+	data, err := json.Marshal(kit)
+	if err != nil {
+		fmt.Println("Kitsunebi.Marshal err, ", err)
+		return ""
+	}
+
+	str := string(data)
+	fmt.Println(str)
+	return encodeBase64("vmess://" + encodeBase64(str))
+}
+func (kit *Kitsunebi) Subscribe() string {
+	return ""
+}
+func (kit *Kitsunebi) URLSchema() string {
+	return ""
+}
+
+func clashX() {
+
+}
+
+func kitsunebi() {
+
+}
+
+func v2rayN() {
+
+}

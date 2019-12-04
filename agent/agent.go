@@ -88,6 +88,7 @@ func (agent *Agent) eventHandler() {
 		case e := <-agent.eventCh:
 			switch e.EventType() {
 			case serf.EventMemberJoin:
+				// _ = serf.Member
 			case serf.EventMemberLeave, serf.EventMemberFailed, serf.EventMemberReap:
 			case serf.EventUser:
 				if agent.config.UserEventHandler != nil {

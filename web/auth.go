@@ -1,29 +1,38 @@
 package web
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
-func getLogin(c *gin.Context) {
-
+func getLogin(c *Context) {
+	c.View(LOGIN, gin.H{
+		"Action":      "/auth/login",
+		"RegisterURL": "/auth/register",
+	})
 }
 
-func postLogin(c *gin.Context) {
-	ctx := Ctx(c)
-	username := c.Query("username")
-	password := c.Query("password")
-	if username == "admin" && password == "123456" {
-		ctx.Session.Set(userkey, username)
-		ctx.Session.Save()
+func postLogin(c *Context) {
+	email := c.PostForm("email")
+	password := c.PostForm("password")
+	fmt.Println("email: ", email, " password: ", password)
+	if email == "admin@gmail.com" && password == "123456" {
+		c.Session.Set(userkey, email)
+		c.Session.Save()
+		c.Redirect("/user")
 		return
 	}
-	ctx.View(LOGIN)
+	c.View(LOGIN)
 }
 
-func getRegister(c *gin.Context) {
-
+func getRegister(c *Context) {
+	c.View(REGISTER, gin.H{
+		"Action":   "/auth/register",
+		"LoginURL": "/auth/login",
+	})
 }
 
-func postRegister(c *gin.Context) {
+func postRegister(c *Context) {
 
 }

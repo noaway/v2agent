@@ -3,7 +3,9 @@ package client
 import (
 	"context"
 	"fmt"
+	"sync"
 
+	"github.com/noaway/v2agent/agent"
 	"github.com/noaway/v2agent/config"
 	"github.com/twinj/uuid"
 	"google.golang.org/grpc"
@@ -19,6 +21,40 @@ const (
 	DEFAULT_TAG      = "proxy"
 )
 
+var (
+	once          sync.Once
+	defaultClient *Client
+)
+
+func InitClient() {
+	once.Do(func() {
+		defaultClient = &Client{}
+		conf := config.Configure()
+		ag, err := agent.NewConfig(
+			agent.SetupCluster(
+				conf.Server.AdvertiseAddr,
+				conf.Server.BindAddr,
+				conf.JoinClusterAddrs...,
+			),
+			agent.SetupUserEventHandler(defaultClient.UserEventHandler),
+			agent.SetupDataDir(conf.DataDir),
+			agent.SetupNodeName(conf.Name),
+		).NewAgent()
+		if err != nil {
+			panic(err)
+		}
+		defaultClient.Agent = ag
+	})
+}
+
+type Client struct {
+	*agent.Agent
+}
+
+func (c *Client) UserEventHandler(e agent.UserEvent) {
+
+}
+
 type User struct {
 	Email    string
 	UUID     string
@@ -28,7 +64,7 @@ type User struct {
 }
 
 func dial() (command.HandlerServiceClient, error) {
-	addr := config.Configure().V2HandlerService.Addr
+	addr := config.Configure().V2HandlerConfig.Addr
 	if addr == "" {
 		addr = DEFAULT_API_ADDR
 	}
@@ -37,7 +73,7 @@ func dial() (command.HandlerServiceClient, error) {
 }
 
 func tag() string {
-	tag := config.Configure().V2HandlerService.Tag
+	tag := config.Configure().V2HandlerConfig.Tag
 	if tag == "" {
 		tag = DEFAULT_TAG
 	}
