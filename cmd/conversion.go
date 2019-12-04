@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -14,6 +15,21 @@ import (
 var KitMap = map[string]Kit{
 	"quantumult": NewQuantumult(),
 	"kitsunebi":  NewKitsunebi(),
+}
+
+func getKitsCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "kits",
+		Short: "Run v2-agnet conversion support of kit",
+		Long:  `Run v2-agnet conversion support of kit`,
+		Run: func(_ *cobra.Command, _ []string) {
+			for k := range KitMap {
+				fmt.Println(k)
+			}
+		},
+	}
+
+	return cmd
 }
 
 func conversionCommand() *cobra.Command {
@@ -35,6 +51,7 @@ func conversionCommand() *cobra.Command {
 	}
 	cmd.Flags().StringVarP(&configPath, "config", "c", "", "config path")
 	cmd.Flags().StringVarP(&kitKey, "kit", "", "", "kit")
+	cmd.AddCommand(getKitsCommand())
 	return cmd
 }
 
@@ -47,7 +64,7 @@ func format(f string, a ...interface{}) string {
 }
 
 type Kit interface {
-	Content(config.V2CliConfig) string
+	Content([]config.V2CliConfig) string
 	Subscribe() string
 	URLSchema() string
 }
@@ -57,34 +74,39 @@ func NewQuantumult() *Quantumult {
 }
 
 type Quantumult struct {
-	content   string
 	subscribe string
 	urlSchema string
 }
 
-func (q *Quantumult) Content(conf config.V2CliConfig) string {
-	certificate := "0"
-	if conf.SkipCertVerify {
-		certificate = "1"
+func (q *Quantumult) Content(confs []config.V2CliConfig) string {
+	content := bytes.Buffer{}
+	for i, conf := range confs {
+		certificate := "0"
+		if conf.SkipCertVerify {
+			certificate = "1"
+		}
+		strs := []string{
+			format("%v = vmess", conf.Name),
+			conf.Server,
+			utils.ToStr(conf.Port),
+			conf.Cipher,
+			format(`"%v"`, conf.UUID),
+			format("group=%v", conf.GroupName),
+			format("over-tls=%v", conf.TLS),
+			format("tls-host=%v", conf.TLSHost),
+			format("certificate=%v", certificate),
+			format("obfs=%v", conf.Protocol),
+			format("obfs-path=%v", conf.WSPath),
+			`obfs-header="Host: 01.alternate.19900101.xyz[Rr][Nn]User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 18_0_0 like Mac OS X) AppleWebKit/888.8.88 (KHTML, like Gecko) Mobile/6666666"`,
+		}
+		str := strings.Join(strs, ",")
+
+		content.WriteString("vmess://" + encodeBase64(str))
+		if i < len(confs)-1 {
+			content.WriteString("\n")
+		}
 	}
-	strs := []string{
-		format("%v = vmess", conf.Name),
-		conf.Server,
-		utils.ToStr(conf.Port),
-		conf.Cipher,
-		format(`"%v"`, conf.UUID),
-		format("group=%v", conf.GroupName),
-		format("over-tls=%v", conf.TLS),
-		format("tls-host=%v", conf.TLSHost),
-		format("certificate=%v", certificate),
-		format("obfs=%v", conf.Protocol),
-		format("obfs-path=%v", conf.WSPath),
-		`obfs-header="Host: 01.alternate.19900101.xyz[Rr][Nn]User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 18_0_0 like Mac OS X) AppleWebKit/888.8.88 (KHTML, like Gecko) Mobile/6666666"`,
-	}
-	str := strings.Join(strs, ",")
-	fmt.Println(str)
-	q.content = encodeBase64("vmess://" + encodeBase64(str))
-	return q.content
+	return encodeBase64(content.String())
 }
 func (q *Quantumult) Subscribe() string { return q.subscribe }
 func (q *Quantumult) URLSchema() string { return q.urlSchema }
@@ -108,8 +130,9 @@ type Kitsunebi struct {
 	Class int    `json:"class"`
 }
 
-func (kit *Kitsunebi) Content(conf config.V2CliConfig) string {
-	{
+func (kit *Kitsunebi) Content(confs []config.V2CliConfig) string {
+	content := bytes.Buffer{}
+	for i, conf := range confs {
 		kit.Host = conf.Server
 		kit.Path = conf.WSPath
 		if conf.TLS {
@@ -124,16 +147,21 @@ func (kit *Kitsunebi) Content(conf config.V2CliConfig) string {
 		kit.PS = conf.Name
 		kit.ID = conf.UUID
 		kit.Class = 0
-	}
-	data, err := json.Marshal(kit)
-	if err != nil {
-		fmt.Println("Kitsunebi.Marshal err, ", err)
-		return ""
+
+		data, err := json.Marshal(kit)
+		if err != nil {
+			fmt.Println("Kitsunebi.Marshal err, ", err)
+			return ""
+		}
+
+		str := string(data)
+		content.WriteString("vmess://" + encodeBase64(str))
+		if i < len(conf.Server)-1 {
+			content.WriteString("\n")
+		}
 	}
 
-	str := string(data)
-	fmt.Println(str)
-	return encodeBase64("vmess://" + encodeBase64(str))
+	return encodeBase64(content.String())
 }
 func (kit *Kitsunebi) Subscribe() string {
 	return ""

@@ -14,7 +14,7 @@ type Configuration struct {
 	DataDir         string          `hcl:"data_dir"`
 	V2HandlerConfig V2HandlerConfig `hcl:"v2ray_handler_service,block"`
 	WebConfig       WebConfig       `hcl:"web_config,block"`
-	V2CliConfig     V2CliConfig     `hcl:"v2cli_config,block"`
+	V2CliConfig     []V2CliConfig   `hcl:"v2cli_config,block"`
 }
 
 type Server struct {

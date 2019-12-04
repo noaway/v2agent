@@ -1,7 +1,7 @@
 package config
 
 type V2CliConfig struct {
-	Name           string `hcl:"name"`
+	Name           string `hcl:"name,label"`
 	GroupName      string `hcl:"group_name"`
 	Server         string `hcl:"server"`
 	Port           int    `hcl:"port"`
