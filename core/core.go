@@ -1,4 +1,4 @@
-package client
+package core
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"v2ray.com/core"
 	"v2ray.com/core/app/proxyman/command"
+	statsService "v2ray.com/core/app/stats/command"
 	"v2ray.com/core/common/protocol"
 	"v2ray.com/core/common/serial"
 	"v2ray.com/core/proxy/vmess"
@@ -28,22 +29,22 @@ var (
 
 func InitClient() {
 	once.Do(func() {
-		defaultClient = &Client{}
-		conf := config.Configure()
-		ag, err := agent.NewConfig(
-			agent.SetupCluster(
-				conf.Server.AdvertiseAddr,
-				conf.Server.BindAddr,
-				conf.JoinClusterAddrs...,
-			),
-			agent.SetupUserEventHandler(defaultClient.UserEventHandler),
-			agent.SetupDataDir(conf.DataDir),
-			agent.SetupNodeName(conf.Name),
-		).NewAgent()
-		if err != nil {
-			panic(err)
-		}
-		defaultClient.Agent = ag
+		// defaultClient = &Client{}
+		// conf := config.Configure()
+		// ag, err := agent.NewConfig(
+		// 	agent.SetupCluster(
+		// 		conf.Server.AdvertiseAddr,
+		// 		conf.Server.BindAddr,
+		// 		conf.JoinClusterAddrs...,
+		// 	),
+		// 	agent.SetupUserEventHandler(defaultClient.UserEventHandler),
+		// 	agent.SetupDataDir(conf.DataDir),
+		// 	agent.SetupNodeName(conf.Name),
+		// ).NewAgent()
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// defaultClient.Agent = ag
 	})
 }
 
@@ -63,13 +64,13 @@ type User struct {
 	Security int32
 }
 
-func dial() (command.HandlerServiceClient, error) {
+func dial() (*grpc.ClientConn, error) {
 	addr := config.Configure().V2HandlerConfig.Addr
 	if addr == "" {
 		addr = DEFAULT_API_ADDR
 	}
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
-	return command.NewHandlerServiceClient(conn), err
+	fmt.Println("dial.addr: ", addr)
+	return grpc.Dial(addr, grpc.WithInsecure())
 }
 
 func tag() string {
@@ -81,10 +82,11 @@ func tag() string {
 }
 
 func AddUser(u *User) (*User, error) {
-	client, err := dial()
+	conn, err := dial()
 	if err != nil {
 		return nil, err
 	}
+	client := command.NewHandlerServiceClient(conn)
 
 	if u.Email == "" {
 		return nil, fmt.Errorf("%v", "email is empty")
@@ -119,21 +121,6 @@ func AddUser(u *User) (*User, error) {
 		},
 	})
 
-	// _, err = client.AddInbound(context.Background(), &command.AlterInboundRequest{
-	// Tag: tag(),
-	// Operation: serial.ToTypedMessage(&command.AddUserOperation{
-	// 	User: &protocol.User{
-	// 		Level: u.Level,
-	// 		Email: u.Email,
-	// 		Account: serial.ToTypedMessage(&vmess.Account{
-	// 			Id:               u.UUID,
-	// 			AlterId:          u.AlterId,
-	// 			SecuritySettings: &protocol.SecurityConfig{Type: protocol.SecurityType_AUTO},
-	// 		}),
-	// 	},
-	// }),
-	// })
-
 	if err != nil {
 		return nil, err
 	}
@@ -141,13 +128,77 @@ func AddUser(u *User) (*User, error) {
 }
 
 func DelUser(email string) error {
-	client, err := dial()
+	conn, err := dial()
 	if err != nil {
 		return err
 	}
+	client := command.NewHandlerServiceClient(conn)
 	_, err = client.AlterInbound(context.Background(), &command.AlterInboundRequest{
 		Tag:       tag(),
 		Operation: serial.ToTypedMessage(&command.RemoveUserOperation{Email: email}),
 	})
 	return err
+}
+
+type Dosage struct {
+	Email string
+	Value string
+}
+
+func QueryStats() ([]Dosage, error) {
+	conn, err := dial()
+	if err != nil {
+		return nil, err
+	}
+
+	client := statsService.NewStatsServiceClient(conn)
+	r := &statsService.QueryStatsRequest{}
+	resp, err := client.QueryStats(context.Background(), r)
+	if err != nil {
+		return nil, err
+	}
+
+	dos := make([]Dosage, len(resp.Stat))
+	for i, s := range resp.Stat {
+		dos[i] = Dosage{
+			Email: s.GetName(),
+			Value: Beautify(s.GetValue()),
+		}
+	}
+	return dos, nil
+}
+
+func GetStats(email string) (*Dosage, error) {
+	conn, err := dial()
+	if err != nil {
+		return nil, err
+	}
+
+	client := statsService.NewStatsServiceClient(conn)
+	r := &statsService.GetStatsRequest{Name: fmt.Sprintf(`user>>>%v>>>traffic>>>uplink`, email)}
+	resp, err := client.GetStats(context.Background(), r)
+
+	return &Dosage{
+		Email: email,
+		Value: Beautify(resp.Stat.GetValue()),
+	}, err
+}
+
+func Beautify(v int64) string {
+	if v == 0 {
+		return ""
+	}
+	if v < 1024 {
+		return fmt.Sprintf("%v b", v)
+	}
+	sh := float64(v / 1024)
+	if sh < 1024 {
+		return fmt.Sprintf("%v kb", sh)
+	}
+	sh = sh / 1024
+	if sh < 1024 {
+		return fmt.Sprintf("%v mb", sh)
+	}
+	sh = sh / 1024
+	return fmt.Sprintf("%v gb", sh)
 }

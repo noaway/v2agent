@@ -6,6 +6,7 @@ require (
 	github.com/gin-contrib/pprof v1.2.1
 	github.com/gin-contrib/sessions v0.0.1
 	github.com/gin-gonic/gin v1.5.0
+	github.com/gogo/protobuf v1.2.0
 	github.com/hashicorp/hcl2 v0.0.0-20191002203319-fb75b3253c80
 	github.com/hashicorp/memberlist v0.1.5
 	github.com/hashicorp/serf v0.8.5

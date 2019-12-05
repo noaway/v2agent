@@ -55,13 +55,9 @@ func conversionCommand() *cobra.Command {
 	return cmd
 }
 
-func encodeBase64(src string) string {
-	return base64.RawStdEncoding.EncodeToString([]byte(src))
-}
+func encodeBase64(src string) string { return base64.RawStdEncoding.EncodeToString([]byte(src)) }
 
-func format(f string, a ...interface{}) string {
-	return fmt.Sprintf(f, a...)
-}
+func format(f string, a ...interface{}) string { return fmt.Sprintf(f, a...) }
 
 type Kit interface {
 	Content([]config.V2CliConfig) string

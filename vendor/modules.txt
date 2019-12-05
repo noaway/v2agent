@@ -25,6 +25,8 @@ github.com/go-playground/locales
 github.com/go-playground/locales/currency
 # github.com/go-playground/universal-translator v0.16.0
 github.com/go-playground/universal-translator
+# github.com/gogo/protobuf v1.2.0
+github.com/gogo/protobuf/proto
 # github.com/golang/protobuf v1.3.2
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
@@ -210,6 +212,7 @@ gopkg.in/yaml.v2
 # v2ray.com/core v4.15.0+incompatible
 v2ray.com/core
 v2ray.com/core/app/proxyman/command
+v2ray.com/core/app/stats/command
 v2ray.com/core/common/protocol
 v2ray.com/core/common/serial
 v2ray.com/core/proxy/vmess
@@ -228,6 +231,8 @@ v2ray.com/core/features/stats
 v2ray.com/core/transport
 v2ray.com/core/transport/internet/udp
 v2ray.com/core/proxy
+v2ray.com/core/app/stats
+v2ray.com/core/common/strmatcher
 v2ray.com/core/common/bitmask
 v2ray.com/core/common/dice
 v2ray.com/core/common/stack
