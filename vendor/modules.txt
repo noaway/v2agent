@@ -6,6 +6,8 @@ github.com/apparentlymart/go-textseg/textseg
 github.com/armon/go-metrics
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
+# github.com/boltdb/bolt v1.3.1
+github.com/boltdb/bolt
 # github.com/cespare/xxhash/v2 v2.1.0
 github.com/cespare/xxhash/v2
 # github.com/gin-contrib/pprof v1.2.1
@@ -25,8 +27,6 @@ github.com/go-playground/locales
 github.com/go-playground/locales/currency
 # github.com/go-playground/universal-translator v0.16.0
 github.com/go-playground/universal-translator
-# github.com/gogo/protobuf v1.2.0
-github.com/gogo/protobuf/proto
 # github.com/golang/protobuf v1.3.2
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
@@ -137,7 +137,7 @@ github.com/zclconf/go-cty/cty/function
 github.com/zclconf/go-cty/cty/set
 github.com/zclconf/go-cty/cty/function/stdlib
 github.com/zclconf/go-cty/cty/json
-# golang.org/x/crypto v0.0.0-20191122220453-ac88ee75c92c
+# golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
 golang.org/x/crypto/ssh
 golang.org/x/crypto/ssh/terminal
 golang.org/x/crypto/chacha20
@@ -210,40 +210,40 @@ gopkg.in/go-playground/validator.v9
 # gopkg.in/yaml.v2 v2.2.2
 gopkg.in/yaml.v2
 # v2ray.com/core v4.15.0+incompatible
-v2ray.com/core
 v2ray.com/core/app/proxyman/command
 v2ray.com/core/app/stats/command
 v2ray.com/core/common/protocol
 v2ray.com/core/common/serial
 v2ray.com/core/proxy/vmess
+v2ray.com/core
 v2ray.com/core/common
-v2ray.com/core/common/buf
 v2ray.com/core/common/errors
-v2ray.com/core/common/net
-v2ray.com/core/features
-v2ray.com/core/features/dns
-v2ray.com/core/features/dns/localdns
 v2ray.com/core/features/inbound
 v2ray.com/core/features/outbound
-v2ray.com/core/features/policy
-v2ray.com/core/features/routing
-v2ray.com/core/features/stats
-v2ray.com/core/transport
-v2ray.com/core/transport/internet/udp
 v2ray.com/core/proxy
 v2ray.com/core/app/stats
 v2ray.com/core/common/strmatcher
+v2ray.com/core/features/stats
 v2ray.com/core/common/bitmask
+v2ray.com/core/common/buf
 v2ray.com/core/common/dice
+v2ray.com/core/common/net
 v2ray.com/core/common/stack
 v2ray.com/core/common/uuid
 v2ray.com/core/common/task
+v2ray.com/core/features
+v2ray.com/core/features/dns
+v2ray.com/core/features/dns/localdns
+v2ray.com/core/features/policy
+v2ray.com/core/features/routing
+v2ray.com/core/transport
+v2ray.com/core/transport/internet/udp
+v2ray.com/core/common/log
+v2ray.com/core/transport/internet
 v2ray.com/core/common/bytespool
 v2ray.com/core/common/platform
 v2ray.com/core/common/signal
-v2ray.com/core/common/log
 v2ray.com/core/common/signal/done
-v2ray.com/core/transport/internet
+v2ray.com/core/common/signal/semaphore
 v2ray.com/core/common/protocol/udp
 v2ray.com/core/common/session
-v2ray.com/core/common/signal/semaphore

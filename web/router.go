@@ -11,6 +11,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/noaway/v2agent/dispatch"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 )
@@ -64,6 +65,13 @@ func (web *WEB) Handler() (http.Handler, error) {
 		auth.POST("/login", web.decorator(postLogin))
 		auth.GET("/register", web.decorator(getRegister))
 		auth.POST("/register", web.decorator(postRegister))
+	}
+
+	dsp := dispatch.DispatchStart()
+	api := r.Group("/v1/api")
+	{
+		api.POST("user", addUser(dsp))
+		api.DELETE("user", delUser(dsp))
 	}
 
 	return r, nil

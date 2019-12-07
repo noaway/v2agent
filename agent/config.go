@@ -10,22 +10,19 @@ import (
 )
 
 const (
-	DefaultAdvertisePort = 5421
-	DefaultBindPort      = 5422
+	DefaultAdvertiseBindPort = 5421
+	DefaultBindPort          = 5422
 )
-
-type UserEvent struct{ serf.UserEvent }
 
 type UserEventHandler func(UserEvent)
 
-func SetupCluster(advertiseAddr, bindAddr string, clusterAddrs ...string) ConfOptHandle {
+type UserEvent struct{ serf.UserEvent }
+
+func SetupCluster(advertisePort int, bindAddr string, clusterAddrs ...string) ConfOptHandle {
 	return func(c *Config) {
-		advertiseHost, advertisePort, err := utils.ParseIPAndPort(advertiseAddr)
-		if err != nil {
-			advertiseHost = "0.0.0.0"
-			advertisePort = DefaultAdvertisePort
+		if advertisePort == 0 {
+			advertisePort = DefaultAdvertiseBindPort
 		}
-		c.serfConfig.MemberlistConfig.AdvertiseAddr = advertiseHost
 		c.serfConfig.MemberlistConfig.AdvertisePort = advertisePort
 
 		bindHost, bindPort, err := utils.ParseIPAndPort(bindAddr)
@@ -52,6 +49,10 @@ func SetupNodeName(nodeName string) ConfOptHandle {
 	return func(c *Config) { c.serfConfig.NodeName = nodeName }
 }
 
+func SetupRegion(region string) ConfOptHandle {
+	return func(c *Config) { c.Region = region }
+}
+
 type ConfOptHandle func(*Config)
 
 func NewConfig(opts ...ConfOptHandle) *Config {
@@ -62,8 +63,7 @@ func NewConfig(opts ...ConfOptHandle) *Config {
 		serfConf.MinQueueDepth = 4096
 		serfConf.LeavePropagateDelay = 3 * time.Second
 		serfConf.ReconnectTimeout = 3 * 24 * time.Hour
-		serfConf.MemberlistConfig = memberlist.DefaultWANConfig()
-		serfConf.MemberlistConfig.AdvertisePort = DefaultAdvertisePort
+		serfConf.MemberlistConfig = memberlist.DefaultLANConfig()
 		serfConf.MemberlistConfig.BindPort = DefaultBindPort
 		serfConf.MemberlistConfig.DeadNodeReclaimTime = 30 * time.Second
 
@@ -79,13 +79,11 @@ func NewConfig(opts ...ConfOptHandle) *Config {
 }
 
 type Config struct {
-	serfConfig *serf.Config
-
+	serfConfig       *serf.Config
 	BindAddr         string
 	LogOutput        io.Writer
 	DataDir          string
 	ClusterAddrs     []string
+	Region           string
 	UserEventHandler UserEventHandler
 }
-
-func (conf *Config) NewAgent() (*Agent, error) { return NewAgent(conf) }

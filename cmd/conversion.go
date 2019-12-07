@@ -49,7 +49,7 @@ func conversionCommand() *cobra.Command {
 			fmt.Println(kit.Content(config.Configure().V2CliConfig))
 		},
 	}
-	cmd.Flags().StringVarP(&configPath, "config", "c", "", "config path")
+	cmd.Flags().StringVarP(configHelp())
 	cmd.Flags().StringVarP(&kitKey, "kit", "", "", "kit")
 	cmd.AddCommand(getKitsCommand())
 	return cmd
@@ -104,6 +104,7 @@ func (q *Quantumult) Content(confs []config.V2CliConfig) string {
 	}
 	return encodeBase64(content.String())
 }
+
 func (q *Quantumult) Subscribe() string { return q.subscribe }
 func (q *Quantumult) URLSchema() string { return q.urlSchema }
 

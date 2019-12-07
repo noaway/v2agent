@@ -50,11 +50,11 @@ func (p *proc) Init() error {
 
 func (p *proc) Start() error {
 	// client.DelUser("ggg")
-	if p.WebConfig.Addr == "" {
+	if p.Server.HttpAddr == "" {
 		return fmt.Errorf("%v", "[web] error listen addr is empty")
 	}
-	logrus.Info("listen: ", p.WebConfig.Addr)
-	httpListener, err := net.Listen("tcp", p.WebConfig.Addr)
+	logrus.Info("listen: ", p.Server.HttpAddr)
+	httpListener, err := net.Listen("tcp", p.Server.HttpAddr)
 	if err != nil {
 		return err
 	}
@@ -65,9 +65,6 @@ func (p *proc) Start() error {
 }
 
 func (p *proc) Stop() error {
-	if p.agent != nil {
-		p.agent.Close()
-	}
 	if p.web != nil {
 		p.web.Close()
 	}

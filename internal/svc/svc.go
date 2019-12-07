@@ -6,8 +6,8 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/sirupsen/logrus"
 	"github.com/noaway/v2agent/internal/utils"
+	"github.com/sirupsen/logrus"
 )
 
 var signalNotify = signal.Notify
@@ -49,6 +49,26 @@ func Run(service Service, signalFunc func() error, sig ...os.Signal) error {
 	}
 
 	return service.Stop()
+}
+
+type Pair struct {
+	m map[string]interface{}
+}
+
+func (p *Pair) Get(k string) interface{}    { return p.m[k] }
+func (p *Pair) Set(k string, v interface{}) { p.m[k] = v }
+
+func Proc(begin func(*Pair) error, end func(*Pair) error) error {
+	p := &Pair{make(map[string]interface{})}
+	if err := begin(p); err != nil {
+		return err
+	}
+	sig := []os.Signal{syscall.SIGINT, syscall.SIGTERM}
+	signalChan := make(chan os.Signal, 1)
+	signalNotify(signalChan, sig...)
+	<-signalChan
+	close(signalChan)
+	return end(p)
 }
 
 // BaseWrapper struct
