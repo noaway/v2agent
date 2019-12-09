@@ -1,4 +1,4 @@
-config.conf
+*.conf
 v2agent
 data
 main
