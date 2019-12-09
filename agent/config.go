@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"io"
 	"time"
 
 	"github.com/hashicorp/memberlist"
@@ -81,7 +80,6 @@ func NewConfig(opts ...ConfOptHandle) *Config {
 type Config struct {
 	serfConfig       *serf.Config
 	BindAddr         string
-	LogOutput        io.Writer
 	DataDir          string
 	ClusterAddrs     []string
 	Region           string

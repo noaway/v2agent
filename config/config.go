@@ -66,7 +66,7 @@ func (log *Log) LoggerToFile() {
 		return
 	}
 
-	file, err := os.OpenFile(log.LogPath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	file, err := os.Create(log.LogPath)
 	if err != nil {
 		panic("LoggerToFile err " + err.Error())
 	}

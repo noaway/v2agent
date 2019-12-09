@@ -1,5 +1,5 @@
-package version 
+package version
 
-const v = "0.0.1"
+const v = "0.0.2"
 
-func Version()string{return v}
+func Version() string { return v }

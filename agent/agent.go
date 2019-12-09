@@ -104,7 +104,6 @@ type AgentIns struct {
 	*bolt.DB
 
 	config     *Config
-	logger     *log.Logger
 	serf       *serf.Serf
 	eventCh    chan serf.Event
 	shutdownCh chan struct{}
@@ -112,21 +111,13 @@ type AgentIns struct {
 
 func (agent *AgentIns) createSerf() (*serf.Serf, error) {
 	conf := agent.config.serfConfig
-
-	fmt.Println(conf.MemberlistConfig.AdvertiseAddr)
-	fmt.Println(conf.MemberlistConfig.AdvertisePort)
-
 	conf.Init()
 
 	conf.Tags["name"] = conf.NodeName
-	if agent.logger == nil {
-		conf.MemberlistConfig.LogOutput = agent.config.LogOutput
-		conf.LogOutput = agent.config.LogOutput
-	}
-
-	conf.Logger = agent.logger
+	logger := log.New(logrus.StandardLogger().Out, "", log.LstdFlags)
 	conf.EventCh = agent.eventCh
-	conf.MemberlistConfig.Logger = agent.logger
+	conf.Logger = logger
+	conf.LogOutput = logrus.StandardLogger().Out
 
 	conf.SnapshotPath = filepath.Join(agent.config.DataDir + "/v2-agent.log")
 	if err := utils.EnsurePath(conf.SnapshotPath, false); err != nil {
@@ -249,7 +240,7 @@ func (agent *AgentIns) eventHandler() {
 	for {
 		numQueuedEvents = len(agent.eventCh)
 		if numQueuedEvents > serfEventBacklogWarning {
-			agent.logger.Printf("[WARN] v2agent: number of queued serf events above warning threshold: %d/%d", numQueuedEvents, serfEventBacklogWarning)
+			logrus.Warnf("v2agent: number of queued serf events above warning threshold: %d/%d", numQueuedEvents, serfEventBacklogWarning)
 		}
 
 		select {
@@ -267,7 +258,7 @@ func (agent *AgentIns) eventHandler() {
 			case serf.EventMemberUpdate: // Ignore
 			case serf.EventQuery: // Ignore
 			default:
-				agent.logger.Printf("[WARN] consul: unhandled LAN Serf Event: %#v", e)
+				logrus.Warnf("consul: unhandled LAN Serf Event: %#v", e)
 			}
 		case <-agent.shutdownCh:
 			return
