@@ -17,11 +17,12 @@ type UserEventHandler func(UserEvent)
 
 type UserEvent struct{ serf.UserEvent }
 
-func SetupCluster(advertisePort int, bindAddr string, clusterAddrs ...string) ConfOptHandle {
+func SetupCluster(advertiseHost string, advertisePort int, bindAddr string, clusterAddrs ...string) ConfOptHandle {
 	return func(c *Config) {
 		if advertisePort == 0 {
 			advertisePort = DefaultAdvertiseBindPort
 		}
+		c.serfConfig.MemberlistConfig.AdvertiseAddr = advertiseHost
 		c.serfConfig.MemberlistConfig.AdvertisePort = advertisePort
 
 		bindHost, bindPort, err := utils.ParseIPAndPort(bindAddr)
@@ -62,7 +63,7 @@ func NewConfig(opts ...ConfOptHandle) *Config {
 		serfConf.MinQueueDepth = 4096
 		serfConf.LeavePropagateDelay = 3 * time.Second
 		serfConf.ReconnectTimeout = 3 * 24 * time.Hour
-		serfConf.MemberlistConfig = memberlist.DefaultLANConfig()
+		serfConf.MemberlistConfig = memberlist.DefaultWANConfig()
 		serfConf.MemberlistConfig.BindPort = DefaultBindPort
 		serfConf.MemberlistConfig.DeadNodeReclaimTime = 30 * time.Second
 

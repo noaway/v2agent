@@ -34,12 +34,13 @@ type V2HandlerConfig struct {
 // 每个节点的配置
 type Agent struct {
 	Name             string   `hcl:"name"`
+	SyncInterval     int      `hcl:"sync_interval"`
 	DataDir          string   `hcl:"data_dir"`
 	JoinClusterAddrs []string `hcl:"join_cluster_addrs"`
 	BindAddr         string   `hcl:"bind_addr"`
-	AdvertisePort    int      `hcl:"advertise_port"`
+	AdvertiseHost    string   `hcl:"advertise_host"` // 外网 host
+	AdvertisePort    int      `hcl:"advertise_port"` // 外网 端口
 	Region           string   `hcl:"region"`
-	// Tag              map[string]string `hcl:"tag,block"`
 }
 
 type Log struct {

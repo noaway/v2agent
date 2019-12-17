@@ -33,6 +33,16 @@ func (f StrTo) MustUint8() uint8 {
 	return v
 }
 
+func (f StrTo) Uint32() (uint32, error) {
+	v, err := strconv.ParseUint(f.String(), 10, 32)
+	return uint32(v), err
+}
+
+func (f StrTo) MustUint32() uint32 {
+	v, _ := f.Uint32()
+	return v
+}
+
 func (f StrTo) MustInt() int {
 	v, _ := f.Int()
 	return v

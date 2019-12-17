@@ -4,7 +4,6 @@ import (
 	"github.com/noaway/v2agent/config"
 	"github.com/noaway/v2agent/dispatch"
 	"github.com/noaway/v2agent/internal/svc"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -18,11 +17,11 @@ func agentCommand() *cobra.Command {
 				config.NewConfigure(configPath)
 				dsp := dispatch.DispatchStart()
 				p.Set("dsp", dsp)
-				logrus.Info("sdsd")
 				return nil
 			}, func(p *svc.Pair) error {
 				dsp := p.Get("dsp").(*dispatch.Dispatch)
 				dsp.Close()
+				config.Close()
 				return nil
 			})
 		},

@@ -20,8 +20,8 @@ var KitMap = map[string]Kit{
 func getKitsCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "kits",
-		Short: "Run v2-agnet conversion support of kit",
-		Long:  `Run v2-agnet conversion support of kit`,
+		Short: "v2agnet conversion support of kit",
+		Long:  `v2agnet conversion support of kit`,
 		Run: func(_ *cobra.Command, _ []string) {
 			for k := range KitMap {
 				fmt.Println(k)
@@ -36,10 +36,13 @@ func conversionCommand() *cobra.Command {
 	var kitKey string
 	cmd := &cobra.Command{
 		Use:   "conversion",
-		Short: "Run v2-agnet conversion config",
-		Long:  `Run v2-agnet conversion config`,
+		Short: "v2agnet conversion config",
+		Long: `unified v2ray configuration file 
+will be transformed into different client configuration, 
+and finally upload the server to realize the subscription function`,
 		Run: func(_ *cobra.Command, _ []string) {
 			config.NewConfigure(configPath)
+			defer config.Close()
 
 			kit, ok := KitMap[kitKey]
 			if !ok {
@@ -165,16 +168,4 @@ func (kit *Kitsunebi) Subscribe() string {
 }
 func (kit *Kitsunebi) URLSchema() string {
 	return ""
-}
-
-func clashX() {
-
-}
-
-func kitsunebi() {
-
-}
-
-func v2rayN() {
-
 }

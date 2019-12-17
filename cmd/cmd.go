@@ -22,6 +22,7 @@ func Commands(root *cobra.Command, childs ...*cobra.Command) {
 		webCommand(),
 		agentCommand(),
 		conversionCommand(),
+		uuidCommand(),
 	)
 	root.Flags().StringVarP(configHelp())
 }

@@ -31,6 +31,11 @@ const (
 	DELETE_USER_EVENT = "delete_user_event"
 )
 
+const (
+	AGENT_SERVER_TYPE = "server"
+	AGENT_CLIENT_TYPE = "client"
+)
+
 var (
 	onceAgent *AgentIns
 	once      = sync.Once{}
@@ -47,6 +52,7 @@ func AgentInit(fns ...UserEventHandler) {
 		conf := config.Configure().Agent
 		config := NewConfig(
 			SetupCluster(
+				conf.AdvertiseHost,
 				conf.AdvertisePort,
 				conf.BindAddr,
 				conf.JoinClusterAddrs...,
@@ -80,7 +86,7 @@ func AgentInit(fns ...UserEventHandler) {
 			panic(fmt.Sprintf("bolt init err %v", err))
 		}
 
-		agent := &AgentIns{
+		agent := &AgentImpl{
 			eventCh:    make(chan serf.Event, 256),
 			shutdownCh: make(chan struct{}),
 			config:     config,
@@ -100,16 +106,17 @@ func AgentInit(fns ...UserEventHandler) {
 
 func ContextAgent() Agent { return onceAgent }
 
-type AgentIns struct {
+type AgentImpl struct {
 	*bolt.DB
 
+	agentType  string
 	config     *Config
 	serf       *serf.Serf
 	eventCh    chan serf.Event
 	shutdownCh chan struct{}
 }
 
-func (agent *AgentIns) createSerf() (*serf.Serf, error) {
+func (agent *AgentImpl) createSerf() (*serf.Serf, error) {
 	conf := agent.config.serfConfig
 	conf.Init()
 
@@ -127,11 +134,15 @@ func (agent *AgentIns) createSerf() (*serf.Serf, error) {
 	return serf.Create(conf)
 }
 
-func (agent *AgentIns) Join(addrs ...string) (int, error) {
+func (agent *AgentImpl) findServer() {
+
+}
+
+func (agent *AgentImpl) Join(addrs ...string) (int, error) {
 	return agent.serf.Join(addrs, true)
 }
 
-func (agent *AgentIns) SyncUser() error {
+func (agent *AgentImpl) SyncUser() error {
 	if agent == nil {
 		return nil
 	}
@@ -160,7 +171,7 @@ func (agent *AgentIns) SyncUser() error {
 	})
 }
 
-func (agent *AgentIns) AddUser(user *core.User) error {
+func (agent *AgentImpl) AddUser(user *core.User) error {
 	data, err := user.Encode()
 	if err != nil {
 		return err
@@ -168,11 +179,11 @@ func (agent *AgentIns) AddUser(user *core.User) error {
 	return agent.userEvent(ADD_USER_EVENT, data, true)
 }
 
-func (agent *AgentIns) DelUser(email string) error {
+func (agent *AgentImpl) DelUser(email string) error {
 	return agent.userEvent(DELETE_USER_EVENT, []byte(email), true)
 }
 
-func (agent *AgentIns) UserEventHandler(ue UserEvent) {
+func (agent *AgentImpl) UserEventHandler(ue UserEvent) {
 	entry := logrus.WithFields(logrus.Fields{
 		"event type": "event messages received by other servers",
 	})
@@ -184,20 +195,24 @@ func (agent *AgentIns) UserEventHandler(ue UserEvent) {
 			return
 		}
 		if agent.InRegion(u.Regions...) {
-			agent.saveUser(&u)
+			if err := agent.saveUser(&u); err != nil {
+				logrus.Warningf("ADD_USER_EVENT add user fail [err='%v']", err)
+			}
+			logrus.Infof(
+				"save user info [uuid='%v', email='%v', region='%v', alterId='%v']",
+				u.UUID, u.Email, u.Regions, u.AlterId,
+			)
 		}
 	case DELETE_USER_EVENT:
-		if err := agent.removeUser(string(ue.Payload)); err != nil {
+		payload := string(ue.Payload)
+		if err := agent.removeUser(payload); err != nil {
 			entry.Warningf("DELETE_USER_EVENT remove user [err='%v', playload='%v']", err, string(ue.Payload))
 		}
+		logrus.Infof("delete user info [email='%v']", payload)
 	}
 }
 
-func (agent *AgentIns) saveUser(u *core.User) error {
-	logrus.Infof(
-		"save user [uuid='%v', email='%v', region='%v', alterId='%v']",
-		u.UUID, u.Email, u.Regions, u.AlterId,
-	)
+func (agent *AgentImpl) saveUser(u *core.User) error {
 	return agent.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(USERS_BUCKET))
 		if err != nil {
@@ -212,30 +227,28 @@ func (agent *AgentIns) saveUser(u *core.User) error {
 	})
 }
 
-func (agent *AgentIns) removeUser(email string) error {
+func (agent *AgentImpl) removeUser(email string) error {
 	return agent.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(USERS_BUCKET))
 		if err != nil {
 			return err
 		}
-
-		if err := b.Delete([]byte(email)); err != nil {
+		if err := core.DelUser(email); err != nil {
 			return err
 		}
-
-		return core.DelUser(email)
+		return b.Delete([]byte(email))
 	})
 }
 
-func (agent *AgentIns) Members() []serf.Member {
+func (agent *AgentImpl) Members() []serf.Member {
 	return agent.serf.Members()
 }
 
-func (agent *AgentIns) userEvent(name string, payload []byte, coalesce bool) error {
+func (agent *AgentImpl) userEvent(name string, payload []byte, coalesce bool) error {
 	return agent.serf.UserEvent(name, payload, coalesce)
 }
 
-func (agent *AgentIns) eventHandler() {
+func (agent *AgentImpl) eventHandler() {
 	var numQueuedEvents int
 	for {
 		numQueuedEvents = len(agent.eventCh)
@@ -266,7 +279,7 @@ func (agent *AgentIns) eventHandler() {
 	}
 }
 
-func (agent *AgentIns) InRegion(regions ...string) bool {
+func (agent *AgentImpl) InRegion(regions ...string) bool {
 	for _, region := range regions {
 		if agent.config.Region == region {
 			return true

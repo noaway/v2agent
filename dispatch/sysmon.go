@@ -7,6 +7,7 @@ import (
 
 	"github.com/noaway/v2agent/agent"
 	"github.com/noaway/v2agent/agent/core"
+	"github.com/noaway/v2agent/config"
 	"github.com/noaway/v2agent/internal/worker"
 	"github.com/sirupsen/logrus"
 )
@@ -34,8 +35,12 @@ func DispatchStart() DispatchHandle {
 }
 
 func (dsp *Dispatch) sched() []worker.LineFunc {
+	interval := time.Second * 3
+	if config.Configure().Agent.SyncInterval > 0 {
+		interval = time.Second * time.Duration(config.Configure().Agent.SyncInterval)
+	}
 	return []worker.LineFunc{
-		dsp.do(time.Second*2, agent.ContextAgent().SyncUser),
+		dsp.do(interval, agent.ContextAgent().SyncUser),
 	}
 }
 

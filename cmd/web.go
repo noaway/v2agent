@@ -68,14 +68,15 @@ func (p *proc) Stop() error {
 	if p.web != nil {
 		p.web.Close()
 	}
+	config.Close()
 	return nil
 }
 
 func webCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "web",
-		Short: "Run v2-agnet web",
-		Long:  `Run v2-agnet manager web server`,
+		Short: "v2agnet web",
+		Long:  `run the web to manage user additions and deletions, information monitoring, etc`,
 		Run: func(_ *cobra.Command, _ []string) {
 			if err := svc.Run(new(proc), nil); err != nil {
 				logrus.Error(err)

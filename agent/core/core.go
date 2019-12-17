@@ -27,7 +27,6 @@ func dial() (*grpc.ClientConn, error) {
 	if addr == "" {
 		addr = DEFAULT_API_ADDR
 	}
-	fmt.Println("dial.addr: ", addr)
 	return grpc.Dial(addr, grpc.WithInsecure())
 }
 
