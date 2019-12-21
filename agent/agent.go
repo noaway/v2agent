@@ -37,7 +37,7 @@ const (
 )
 
 var (
-	onceAgent *AgentIns
+	onceAgent *AgentImpl
 	once      = sync.Once{}
 )
 

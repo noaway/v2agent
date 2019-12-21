@@ -95,7 +95,7 @@ func (q *Quantumult) Content(confs []config.V2CliConfig) string {
 			format("tls-host=%v", conf.TLSHost),
 			format("certificate=%v", certificate),
 			format("obfs=%v", conf.Protocol),
-			format("obfs-path=%v", conf.WSPath),
+			format(`obfs-path="%v"`, conf.WSPath),
 			`obfs-header="Host: 01.alternate.19900101.xyz[Rr][Nn]User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 18_0_0 like Mac OS X) AppleWebKit/888.8.88 (KHTML, like Gecko) Mobile/6666666"`,
 		}
 		str := strings.Join(strs, ",")
