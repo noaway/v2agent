@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/noaway/v2agent/config"
 	"github.com/twinj/uuid"
@@ -19,15 +20,24 @@ const (
 	DEFAULT_TAG      = "proxy"
 )
 
+var (
+	dialOnce = sync.Once{}
+	connOnce *grpc.ClientConn
+)
+
 type Client struct {
 }
 
 func dial() (*grpc.ClientConn, error) {
-	addr := config.Configure().V2HandlerConfig.Addr
-	if addr == "" {
-		addr = DEFAULT_API_ADDR
-	}
-	return grpc.Dial(addr, grpc.WithInsecure())
+	var err error
+	dialOnce.Do(func() {
+		addr := config.Configure().V2HandlerConfig.Addr
+		if addr == "" {
+			addr = DEFAULT_API_ADDR
+		}
+		connOnce, err = grpc.Dial(addr, grpc.WithInsecure())
+	})
+	return connOnce, err
 }
 
 func tag() string {
