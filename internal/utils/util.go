@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"hash"
+	"io/ioutil"
 	"math/rand"
 	"net"
 	"os"
@@ -263,4 +264,32 @@ func PBKDF2(password, salt []byte, iter, keyLen int, h func() hash.Hash) ([]byte
 		}
 	}
 	return dk[:keyLen], nil
+}
+
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func GetDir(dir string, option func(path string) (bool, error)) (string, error) {
+	if option != nil {
+		is, err := option(dir)
+		if err != nil {
+			return "", err
+		}
+		if !is {
+			return dir, EnsurePath(dir, true)
+		}
+	}
+	return dir, nil
+}
+
+func WriteFile(file string, data []byte) error {
+	return ioutil.WriteFile(file, data, 0644)
 }

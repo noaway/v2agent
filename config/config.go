@@ -16,6 +16,7 @@ type Configuration struct {
 	V2HandlerConfig V2HandlerConfig `hcl:"v2ray_handler_service,block"`
 	V2CliConfig     []V2CliConfig   `hcl:"v2cli_config,block"`
 	Log             Log             `hcl:"log,block"`
+	SubscribePath   string          `hcl:"subscribe_path"`
 }
 
 // 本地服务器 http 配置
@@ -100,9 +101,19 @@ func NewConfigure(filename string) {
 	file, diags := parser.ParseHCLFile(filename)
 
 	if diags != nil {
-		panic(fmt.Sprintf("NewConfigure.ParseHCLFile diags: %s", diags))
+		panic(fmt.Sprintf("NewConfigure.ParseHCLFile diags: %v", diags))
 	}
 	gohcl.DecodeBody(file.Body, nil, configure)
 
 	Configure().Log.InitLogrus()
+}
+
+func Unmarshal(filename string, data []byte, v interface{}) error {
+	parser := hclparse.NewParser()
+	file, diags := parser.ParseHCL(data, filename)
+	if diags != nil {
+		return fmt.Errorf("NewConfigure.ParseHCLFile diags: %v", diags)
+	}
+	fmt.Println(gohcl.DecodeBody(file.Body, nil, v))
+	return nil
 }
