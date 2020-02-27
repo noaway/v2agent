@@ -3,12 +3,14 @@ package web
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/noaway/v2agent/config"
 	"github.com/noaway/v2agent/dispatch"
 	"github.com/noaway/v2agent/internal/gensub"
 	"github.com/noaway/v2agent/internal/utils"
+	"github.com/noaway/v2agent/web/models"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,6 +21,8 @@ func addUser(dsp dispatch.DispatchHandle) gin.HandlerFunc {
 		region := c.PostForm("region")
 		alterId := utils.StrTo(c.PostForm("alter_id")).MustUint32()
 		conf := c.PostForm("conf")
+		orderPackage := utils.StrTo(c.PostForm("package")).MustInt()
+		price := utils.StrTo(c.PostForm("price")).MustInt64()
 
 		if alterId == 0 {
 			alterId = 64
@@ -30,6 +34,20 @@ func addUser(dsp dispatch.DispatchHandle) gin.HandlerFunc {
 		u.AlterId = alterId
 		u.Regions = strings.Split(region, ",")
 		if err := dsp.AddUser(u); err != nil {
+			c.JSON(200, gin.H{
+				"errmsg": err,
+			})
+			return
+		}
+		now := time.Now()
+
+		if err := models.SyncOrder(&models.Order{
+			Email:      email,
+			Package:    orderPackage,
+			Config:     conf,
+			Price:      price,
+			ExpireTime: now.AddDate(0, orderPackage, 0),
+		}); err != nil {
 			c.JSON(200, gin.H{
 				"errmsg": err,
 			})
