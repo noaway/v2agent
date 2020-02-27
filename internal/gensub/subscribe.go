@@ -3,8 +3,8 @@ package gensub
 import (
 	"bytes"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/noaway/v2agent/config"
@@ -91,30 +91,19 @@ type Kitsunebi struct {
 func (kit *Kitsunebi) Content(confs []config.V2CliConfig) string {
 	content := bytes.Buffer{}
 	for i, conf := range confs {
-		kit.Host = conf.Server
-		kit.Path = conf.WSPath
-		if conf.TLS {
-			kit.Tls = "tls"
+		first := encodeBase64(fmt.Sprintf("%v:%v@%v:%v", conf.Cipher, conf.UUID, conf.Server, conf.Port))
+		tls := 1
+		if !conf.TLS {
+			tls = 0
 		}
-		kit.Add = conf.Server
-		kit.Port = conf.Port
-		kit.Aid = conf.AlterId
-		kit.Net = conf.Protocol
-		kit.Type = conf.Cipher
-		kit.V = "2"
-		kit.PS = conf.Name
-		kit.ID = conf.UUID
-		kit.Class = 0
-
-		data, err := json.Marshal(kit)
-		if err != nil {
-			fmt.Println("Kitsunebi.Marshal err, ", err)
-			return ""
+		skipCertVerify := 1
+		if !conf.SkipCertVerify {
+			skipCertVerify = 0
 		}
+		second := url.PathEscape(fmt.Sprintf("network=%v&wsPath=%v&aid=%v&tls=%v&allowInsecure=%v&remark=%v", conf.Protocol, conf.WSPath, conf.AlterId, tls, skipCertVerify, conf.Name))
+		content.WriteString("vmess://" + first + "?" + second)
 
-		str := string(data)
-		content.WriteString("vmess://" + encodeBase64(str))
-		if i < len(conf.Server)-1 {
+		if i < len(confs)-1 {
 			content.WriteString("\n")
 		}
 	}
