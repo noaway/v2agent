@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/noaway/v2agent/internal/gensub"
 
 	"github.com/noaway/v2agent/config"
@@ -32,15 +33,18 @@ func conversionCommand() *cobra.Command {
 will be transformed into different client configuration, 
 and finally upload the server to realize the subscription function`,
 		Run: func(_ *cobra.Command, _ []string) {
-			config.NewConfigure(configPath)
-			defer config.Close()
+			if err := config.NewConfigure(configPath); err != nil {
+				fmt.Println(err)
+				return
+			}
 
 			kit, ok := gensub.KitMap[kitKey]
 			if !ok {
 				fmt.Println("not found kit")
 				return
 			}
-			fmt.Println(kit.Content(config.Configure().V2CliConfig))
+			conf := config.Configure()
+			fmt.Println(kit.Content(gensub.ProxyConfig{V2ray: conf.V2ray, SS: conf.SS}))
 		},
 	}
 	cmd.Flags().StringVarP(configHelp())
