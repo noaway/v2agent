@@ -2,21 +2,24 @@ package config
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
-	"github.com/hashicorp/hcl2/gohcl"
-	"github.com/hashicorp/hcl2/hclparse"
+	// "github.com/hashicorp/hcl2/gohcl"
+	// "github.com/hashicorp/hcl2/hclparse"
+	"github.com/hashicorp/hcl"
 	"github.com/noaway/godao"
 	"github.com/sirupsen/logrus"
 )
 
 type Configuration struct {
-	Server          Server          `hcl:"server,block"`
-	Agent           Agent           `hcl:"agent,block"`
-	V2HandlerConfig V2HandlerConfig `hcl:"v2ray_handler_service,block"`
-	V2CliConfig     []V2CliConfig   `hcl:"v2cli_config,block"`
-	Log             Log             `hcl:"log,block"`
-	SubscribePath   string          `hcl:"subscribe_path"`
+	Server          Server                 `hcl:"server,block"`
+	Agent           Agent                  `hcl:"agent,block"`
+	V2HandlerConfig V2HandlerConfig        `hcl:"v2ray_handler_service,block"`
+	V2ray           map[string]V2CliConfig `hcl:"v2ray,block"`
+	Ss              map[string]SsConfig    `hcl:"ss,block"`
+	Log             Log                    `hcl:"log,block"`
+	SubscribePath   string                 `hcl:"subscribe_path"`
 }
 
 // 本地服务器 http 配置
@@ -97,23 +100,19 @@ func NewConfigure(filename string) {
 	if filename == "" {
 		return
 	}
-	parser := hclparse.NewParser()
-	file, diags := parser.ParseHCLFile(filename)
 
-	if diags != nil {
-		panic(fmt.Sprintf("NewConfigure.ParseHCLFile diags: %v", diags))
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(fmt.Sprintf("read config error. [err='%v',filename='%v']", err, filename))
 	}
-	gohcl.DecodeBody(file.Body, nil, configure)
+
+	if err := hcl.Decode(configure, string(data)); err != nil {
+		panic(fmt.Sprintf("parse config file error. [err='%v',filename='%v']", err, filename))
+	}
 
 	Configure().Log.InitLogrus()
 }
 
 func Unmarshal(filename string, data []byte, v interface{}) error {
-	parser := hclparse.NewParser()
-	file, diags := parser.ParseHCL(data, filename)
-	if diags != nil {
-		return fmt.Errorf("NewConfigure.ParseHCLFile diags: %v", diags)
-	}
-	fmt.Println(gohcl.DecodeBody(file.Body, nil, v))
 	return nil
 }

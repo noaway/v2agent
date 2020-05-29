@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/noaway/v2agent/internal/gensub"
 
 	"github.com/noaway/v2agent/config"
@@ -40,7 +41,7 @@ and finally upload the server to realize the subscription function`,
 				fmt.Println("not found kit")
 				return
 			}
-			fmt.Println(kit.Content(config.Configure().V2CliConfig))
+			fmt.Println(kit.Content(gensub.ProxyConfig{V2ray: config.Configure().V2ray, Ss: config.Configure().Ss}))
 		},
 	}
 	cmd.Flags().StringVarP(configHelp())

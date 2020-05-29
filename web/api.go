@@ -69,7 +69,7 @@ func addUser(dsp dispatch.DispatchHandle) gin.HandlerFunc {
 		}
 
 		cli := struct {
-			V2CliConfig []config.V2CliConfig `hcl:"v2cli_config,block"`
+			V2CliConfig map[string]config.V2CliConfig `hcl:"v2ray,block"`
 		}{}
 
 		if err := config.Unmarshal(email, []byte(conf), &cli); err != nil {
@@ -78,12 +78,11 @@ func addUser(dsp dispatch.DispatchHandle) gin.HandlerFunc {
 			})
 			return
 		}
-		cliConfigs := cli.V2CliConfig
 
 		paths := []string{}
 	loop:
 		for k, v := range gensub.KitMap {
-			content := v.Content(cliConfigs)
+			content := v.Content(gensub.ProxyConfig{V2ray: cli.V2CliConfig})
 			relative := "/" + email + "/"
 			path, err := utils.GetDir(fmt.Sprintf("%v/%v/", config.Configure().SubscribePath, email), utils.PathExists)
 			if err != nil {
