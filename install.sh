@@ -145,7 +145,7 @@ server {
     enabled = true
     bootstrap_expect = 1
     server_join {
-	retry_join = ["$cluster"]
+	    retry_join = ["$cluster"]
     }
 }
 
@@ -157,6 +157,12 @@ client {
 advertise {
     rpc = "$current_domain"
     serf = "$current_domain"
+}
+
+plugin "raw_exec" {
+  config {
+    enabled = true
+  }
 }
 EOF
 
