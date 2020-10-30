@@ -23,7 +23,7 @@ func encodeBase64(src string) string { return base64.RawStdEncoding.EncodeToStri
 func format(f string, a ...interface{}) string { return fmt.Sprintf(f, a...) }
 
 type ProxyConfig struct {
-	V2ray map[string]config.V2CliConfig
+	V2ray []config.V2CliConfig
 	Ss    map[string]config.SsConfig
 }
 
@@ -74,6 +74,61 @@ func (q *Quantumult) Content(proxy ProxyConfig) string {
 func (q *Quantumult) Subscribe() string { return q.subscribe }
 func (q *Quantumult) URLSchema() string { return q.urlSchema }
 
+/*
+vmess://base64(security:uuid@host:port)?[key=urlencode(value)[&key=urlencode(value) ...]]
+
+
+其中 base64、urlencode 为函数，security 为加密方式，最后一部分是以 & 为分隔符的参数列表，key 为参数名称，value 为相应的值，例如：network=kcp&aid=32&remark=服务器1 经过 urlencode 后为 network=kcp&aid=32&remark=%E6%9C%8D%E5%8A%A1%E5%99%A81
+
+
+一个完整的例子：vmess://Y2hhY2hhMjAtcG9seTEzMDU6OTUxMzc4NTctNzBmYS00YWM4LThmOTAtNGUyMGFlYjY2MmNmQHVuaS5raXRzdW5lYmkuZnVuOjU2NjY=?network=ws&wsPath=/v2&aid=0&tls=1&allowInsecure=1&mux=0&muxConcurrency=8&remark=WSS%20Test%20Outbound
+
+
+可选参数（参数名称不区分大小写）：
+
+network - 可选的值为 "tcp"、 "kcp"、"ws"、"h2" 等
+
+wsPath - WebSocket 的协议路径
+
+wsHost - WebSocket HTTP 头里面的 Host 字段值
+
+kcpHeader - kcp 的伪装类型
+
+uplinkCapacity - kcp 的上行容量
+
+downlinkCapacity - kcp 的下行容量
+
+h2Path - h2 的路径
+
+h2Host - h2 的域名
+
+quicSecurity - quic 加密方式
+
+quicKey - quic 加密密钥
+
+quicHeaderType - quic 头部伪装类型
+
+aid - AlterId
+
+tls - 是否启用 TLS，为 0 或 1
+
+allowInsecure - TLS 的 AllowInsecure，为 0 或 1
+
+tlsServer - TLS 的服务器端证书的域名
+
+mux - 是否启用 mux，为 0 或 1
+
+muxConcurrency - mux 的 最大并发连接数
+
+remark - 备注名称
+
+
+导入配置时，不在列表中的参数一般会按照 Core 的默认值处理。
+
+
+ss:// 和 socks:// 的格式类似。
+*/
+
 func NewKitsunebi() *Kitsunebi {
 	return &Kitsunebi{}
 }
@@ -105,7 +160,7 @@ func (kit *Kitsunebi) Content(proxy ProxyConfig) string {
 		if !v2ray.SkipCertVerify {
 			skipCertVerify = 0
 		}
-		second := url.PathEscape(fmt.Sprintf("network=%v&wsPath=%v&aid=%v&tls=%v&allowInsecure=%v&remark=%v", v2ray.Protocol, v2ray.WSPath, v2ray.AlterId, tls, skipCertVerify, v2ray.Name))
+		second := url.PathEscape(fmt.Sprintf("network=%v&wsPath=%v&aid=%v&tls=%v&allowInsecure=%v&remark=%v", v2ray.Protocol, v2ray.WSPath, v2ray.AlterId, tls, skipCertVerify, url.QueryEscape(v2ray.Name)))
 		content.WriteString("vmess://" + first + "?" + second)
 		content.WriteString("\n")
 	}

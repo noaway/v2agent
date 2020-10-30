@@ -19,8 +19,6 @@ func configHelp() (p *string, name, shorthand string, value string, usage string
 
 func Commands(root *cobra.Command, childs ...*cobra.Command) {
 	root.AddCommand(
-		webCommand(),
-		agentCommand(),
 		conversionCommand(),
 		uuidCommand(),
 	)

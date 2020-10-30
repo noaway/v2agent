@@ -22,9 +22,9 @@ replace_v2ray_config(){
                         "email":"noaway@gmail.com"
                     },
                     {
-                        "id":"cefa7a9b-2f94-c7fd-b5a3-1e79d4ec8a15",
+                        "id":"76c53c72-f018-4421-a8e1-9c4c2ed3bcec",
                         "alterId":10,
-                        "email":"1014924101@qq.com"
+                        "email":"1126866738@qq.com"
                     },
                     {
                         "id":"bfb4aa24-8493-4986-9f49-f04ac9524adb",
@@ -113,6 +113,6 @@ main(){
     systemctl restart v2ray &&
     sleep 2 &&
     systemctl status v2ray
-    exit 1
+    exit 0
 }
 main

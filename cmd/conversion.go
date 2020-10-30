@@ -34,7 +34,6 @@ will be transformed into different client configuration,
 and finally upload the server to realize the subscription function`,
 		Run: func(_ *cobra.Command, _ []string) {
 			config.NewConfigure(configPath)
-			defer config.Close()
 
 			kit, ok := gensub.KitMap[kitKey]
 			if !ok {
@@ -42,7 +41,7 @@ and finally upload the server to realize the subscription function`,
 				return
 			}
 			v2ray := config.Configure().V2ray
-			fmt.Println(kit.Content(gensub.ProxyConfig{V2ray: v2ray, Ss: config.Configure().Ss}))
+			fmt.Println(kit.Content(gensub.ProxyConfig{V2ray: v2ray}))
 		},
 	}
 	cmd.Flags().StringVarP(configHelp())
