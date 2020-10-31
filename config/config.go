@@ -6,7 +6,6 @@ import (
 
 type Configuration struct {
 	V2ray []V2CliConfig `hcl:"v2ray,block"`
-	Ss    []SsConfig    `hcl:"ss,optional"`
 }
 
 var configure *Configuration

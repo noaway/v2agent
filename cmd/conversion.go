@@ -33,7 +33,10 @@ func conversionCommand() *cobra.Command {
 will be transformed into different client configuration, 
 and finally upload the server to realize the subscription function`,
 		Run: func(_ *cobra.Command, _ []string) {
-			config.NewConfigure(configPath)
+			if err := config.NewConfigure(configPath); err != nil {
+				fmt.Println(err)
+				return
+			}
 
 			kit, ok := gensub.KitMap[kitKey]
 			if !ok {

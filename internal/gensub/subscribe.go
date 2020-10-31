@@ -24,7 +24,6 @@ func format(f string, a ...interface{}) string { return fmt.Sprintf(f, a...) }
 
 type ProxyConfig struct {
 	V2ray []config.V2CliConfig
-	Ss    map[string]config.SsConfig
 }
 
 type Kit interface {
@@ -160,7 +159,7 @@ func (kit *Kitsunebi) Content(proxy ProxyConfig) string {
 		if !v2ray.SkipCertVerify {
 			skipCertVerify = 0
 		}
-		second := url.PathEscape(fmt.Sprintf("network=%v&wsPath=%v&aid=%v&tls=%v&allowInsecure=%v&remark=%v", v2ray.Protocol, v2ray.WSPath, v2ray.AlterId, tls, skipCertVerify, url.QueryEscape(v2ray.Name)))
+		second := url.PathEscape(fmt.Sprintf("network=%v&wsPath=%v&aid=%v&tls=%v&allowInsecure=%v&remark=%v", v2ray.Protocol, v2ray.WSPath, v2ray.AlterId, tls, skipCertVerify, v2ray.Name))
 		content.WriteString("vmess://" + first + "?" + second)
 		content.WriteString("\n")
 	}
