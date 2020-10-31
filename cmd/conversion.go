@@ -43,8 +43,8 @@ and finally upload the server to realize the subscription function`,
 				fmt.Println("not found kit")
 				return
 			}
-			v2ray := config.Configure().V2ray
-			fmt.Println(kit.Content(gensub.ProxyConfig{V2ray: v2ray}))
+			conf := config.Configure()
+			fmt.Println(kit.Content(gensub.ProxyConfig{V2ray: conf.V2ray, SS: conf.SS}))
 		},
 	}
 	cmd.Flags().StringVarP(configHelp())

@@ -14,3 +14,12 @@ type V2CliConfig struct {
 	TLSHost        string `hcl:"tls_host"`
 	SkipCertVerify bool   `hcl:"skip_cert_verify"`
 }
+
+type SSConfig struct {
+	Name     string `hcl:"name,label"`
+	Type     string `hcl:"type"`
+	Server   string `hcl:"server"`
+	Port     string `hcl:"port"`
+	Cipher   string `hcl:"cipher"`
+	Password string `hcl:"password"`
+}

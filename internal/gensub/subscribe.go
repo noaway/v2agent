@@ -24,6 +24,7 @@ func format(f string, a ...interface{}) string { return fmt.Sprintf(f, a...) }
 
 type ProxyConfig struct {
 	V2ray []config.V2CliConfig
+	SS    []config.SSConfig
 }
 
 type Kit interface {
@@ -160,10 +161,13 @@ func (kit *Kitsunebi) Content(proxy ProxyConfig) string {
 			skipCertVerify = 0
 		}
 		second := url.PathEscape(fmt.Sprintf("network=%v&wsPath=%v&aid=%v&tls=%v&allowInsecure=%v&remark=%v", v2ray.Protocol, v2ray.WSPath, v2ray.AlterId, tls, skipCertVerify, v2ray.Name))
-		content.WriteString("vmess://" + first + "?" + second)
-		content.WriteString("\n")
+		content.WriteString("vmess://" + first + "?" + second + "\n")
 	}
-
+	for _, ss := range proxy.SS {
+		first := encodeBase64(fmt.Sprintf("%v:%v@%v:%v", ss.Cipher, ss.Password, ss.Server, ss.Port))
+		second := url.PathEscape(ss.Name)
+		content.WriteString("ss://" + first + "#" + second + "\n")
+	}
 	return encodeBase64(content.String())
 }
 
@@ -217,6 +221,12 @@ func (kit *V2rayDefaultKit) Content(proxy ProxyConfig) string {
 		str := string(data)
 		content.WriteString("vmess://" + encodeBase64(str))
 		content.WriteString("\n")
+	}
+
+	for _, ss := range proxy.SS {
+		first := encodeBase64(fmt.Sprintf("%v:%v@%v:%v", ss.Cipher, ss.Password, ss.Server, ss.Port))
+		second := url.PathEscape(ss.Name)
+		content.WriteString("ss://" + first + "#" + second + "\n")
 	}
 
 	return encodeBase64(content.String())
