@@ -6,6 +6,7 @@ PROXY_PATH=/Users/noaway/Documents/proxy
 URI=https://conoha.noaway.io/subscribe
 
 run(){
+    echo "$1 $2"
     go run main.go conversion --kit $1 -c $2 > $1.conf
 }
 

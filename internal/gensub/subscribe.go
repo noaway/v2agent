@@ -76,7 +76,7 @@ func (q *Quantumult) URLSchema() string { return q.urlSchema }
 
 /*
 vmess://base64(security:uuid@host:port)?[key=urlencode(value)[&key=urlencode(value) ...]]
-
+ss://base64(security:password@host:port)#remark
 
 其中 base64、urlencode 为函数，security 为加密方式，最后一部分是以 & 为分隔符的参数列表，key 为参数名称，value 为相应的值，例如：network=kcp&aid=32&remark=服务器1 经过 urlencode 后为 network=kcp&aid=32&remark=%E6%9C%8D%E5%8A%A1%E5%99%A81
 

@@ -1,4 +1,4 @@
-job "sync_v2ray_config" {
+job "sync_proxy_config" {
   datacenters = ["taiwan","conoha","la"]
   type = "batch"
 
@@ -11,6 +11,12 @@ job "sync_v2ray_config" {
   group "default" {
     # 有多少个数据中心就写几个
     count = 3
+
+    # 运行失败禁止重排
+    reschedule {
+      attempts  = 0
+      unlimited = false
+    }
 
     task "v2ray_config" {
       driver = "raw_exec"
