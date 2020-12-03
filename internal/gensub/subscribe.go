@@ -16,6 +16,7 @@ var KitMap = map[string]Kit{
 	"quantumult": NewQuantumult(),
 	"kitsunebi":  NewKitsunebi(),
 	"default":    NewV2rayDefaultKit(),
+	"clash":      NewClash(),
 }
 
 func encodeBase64(src string) string { return base64.RawStdEncoding.EncodeToString([]byte(src)) }
