@@ -40,6 +40,11 @@ replace_v2ray_config(){
                         "id":"471d4453-85c8-4999-afb0-ecb809100e39",
                         "alterId":10,
                         "email":"nxlzy17@gmail.com"
+                    },
+                    {
+                        "id":"174ffd70-334d-4e73-a752-02a917ec0fa3",
+                        "alterId":10,
+                        "email":"feixiang@noaway.io"
                     }
                 ]
             },

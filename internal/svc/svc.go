@@ -63,12 +63,15 @@ func Proc(begin func(*Pair) error, end func(*Pair) error) error {
 	if err := begin(p); err != nil {
 		return err
 	}
+	WaitSignal()
+	return end(p)
+}
+
+func WaitSignal() {
 	sig := []os.Signal{syscall.SIGINT, syscall.SIGTERM}
 	signalChan := make(chan os.Signal, 1)
 	signalNotify(signalChan, sig...)
 	<-signalChan
-	close(signalChan)
-	return end(p)
 }
 
 // BaseWrapper struct
