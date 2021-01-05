@@ -47,6 +47,11 @@ replace_v2ray_config(){
                         "email":"feixiang@noaway.io"
                     },
                     {
+                        "id":"5c09eba3-d93e-444b-8471-2924f178bf08",
+                        "alterId":10,
+                        "email":"575920524@qq.com"
+                    },
+                    {
                         "id":"84551655-8ac0-4344-9e59-0b19de906857",
                         "alterId":10,
                         "email":"384819518@qq.com"
