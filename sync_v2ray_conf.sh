@@ -27,11 +27,6 @@ replace_v2ray_config(){
                         "email":"1126866738@qq.com"
                     },
                     {
-                        "id":"bfb4aa24-8493-4986-9f49-f04ac9524adb",
-                        "alterId":10,
-                        "email":"maggie.hmg@hotmail.com"
-                    },
-                    {
                         "id":"6f27d2af-2bc6-42e9-a2b5-df4ab5049b85",
                         "alterId":10,
                         "email":"114408120@qq.com"
