@@ -3,6 +3,6 @@ v2agent
 data
 main
 *.log
-*.json
 *.tar.gz
 *.tar
+.vscode/

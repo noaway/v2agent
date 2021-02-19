@@ -21,10 +21,11 @@ job "sync_proxy_config" {
     task "v2ray_config" {
       driver = "raw_exec"
       config {
-        command = "config.sh"
+        command = "sync_v2ray_conf.sh"
       }
+     
       artifact {
-        source = "https://conoha.noaway.io/subscribe/v2ray_config/config.sh"
+        source = "https://conoha.noaway.io/subscribe/v2ray_config/config.tar.gz"
       }
     }
   }
